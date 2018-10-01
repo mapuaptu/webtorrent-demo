@@ -1,0 +1,16 @@
+# root
+
+node_modules
+.idea
+package-lock.json
+yarn.lock
+*.env
+build
+
+# client
+
+client/node_modules
+client/build
+client/.idea
+client/package-lock.json
+client/yarn.lock
