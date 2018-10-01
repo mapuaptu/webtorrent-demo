@@ -8,6 +8,12 @@ const StyledInput = styled.div`
   margin-bottom: 40px;
 `;
 
+const StyledVideo = styled.div`
+  width: 500px;
+  height: 500px;
+  background-color: #000;
+`;
+
 class WebTorrent extends Component {
   state = {
     value: '',
@@ -58,6 +64,9 @@ class WebTorrent extends Component {
           Отправить
         </Button>
         <Typography>{this.state.response}</Typography>
+        <StyledVideo>
+          <video controls={true} src="http://localhost:3000/webtorrent" width={500} height={500} />
+        </StyledVideo>
       </Container>
     );
   }

@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import cors from 'cors';
 import WebTorrent from 'webtorrent';
+import fs from 'fs';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -24,8 +25,14 @@ app.get('/', (req, res) => {
 });
 
 app.post('/webtorrent', (req, res) => {
-  res.json({
-    msg: req.body.value,
+  const magnet = req.body.value;
+
+  const client = new WebTorrent();
+
+  const newtorrent = client.add(magnet, torrent => {
+    const file = torrent.files[0];
+
+    file.createReadStream();
   });
 });
 
