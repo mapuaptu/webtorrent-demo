@@ -13,11 +13,18 @@
     "lint:css": "stylelint client/src/**/*.js",
     "heroku-postbuild": "npm i --prefix client && npm run build --prefix client"
   },
-  "keywords": ["webtorrent", "demo"],
+  "keywords": [
+    "webtorrent",
+    "demo"
+  ],
   "author": "Alex Nikishkin <mapuaptu@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "express": "4.16.3"
+    "body-parser": "1.18.3",
+    "cors": "2.8.4",
+    "express": "4.16.3",
+    "morgan": "1.9.1",
+    "webtorrent": "0.102.4"
   },
   "devDependencies": {
     "nodemon": "1.18.4"
