@@ -39,7 +39,6 @@ class WebTorrent extends Component {
     stats: {
       progress: 0,
       downloadSpeed: 0,
-      ratio: 0,
     },
   };
 
@@ -65,6 +64,10 @@ class WebTorrent extends Component {
   };
 
   handleSubmit = async () => {
+    this.setState(() => ({
+      disabled: true,
+    }));
+
     const { error, data } = await axios.post('/addtorrent', {
       value: this.state.value,
     });
@@ -125,9 +128,10 @@ class WebTorrent extends Component {
 
         {this.state.showVideo && (
           <div>
-            <Typography>Progress: {this.state.stats.progress}</Typography>
-            <Typography>Speed: {this.state.stats.downloadSpeed}</Typography>
-            <Typography>Ratio: {this.state.stats.ratio}</Typography>
+            <Typography>Progress: {this.state.stats.progress} %</Typography>
+            <Typography>
+              Speed: {Math.round(this.state.stats.downloadSpeed) / 10 ** 6} Mb/s
+            </Typography>
           </div>
         )}
 

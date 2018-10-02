@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node --experimental-modules server.mjs",
-    "server": "nodemon --experimental-modules server.mjs",
+    "server": "nodemon --experimental-modules server.mjs ",
     "client": "npm start --prefix client",
     "lint": "npm run lint:js && npm run lint:serverJs && npm run lint:css",
     "lint:js": "prettier --write client/src/**/*.js",
