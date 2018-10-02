@@ -98,9 +98,9 @@ class WebTorrent extends Component {
             Отправить
           </Button>
         </StyledButton>
-        {this.state.files.map((file, index) => {
-          return <Typography key={index}>{file.name}</Typography>;
-        })}
+        {/*{this.state.files.map((file, index) => {*/}
+          {/*return <Typography key={index}>{file.name}</Typography>;*/}
+        {/*})}*/}
 
         {this.state.showVideo && (
           <div>
