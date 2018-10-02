@@ -5,6 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import WebTorrent from 'webtorrent';
 import fs from 'fs';
+import path from 'path';
 
 const app = express();
 const port = process.env.PORT || 5000;
