@@ -23,6 +23,12 @@ const StyledButton = styled.div`
   margin-bottom: 20px;
 `;
 
+const VideoContainer = styled.div`
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+`;
+
 class WebTorrent extends Component {
   state = {
     value: '',
@@ -45,21 +51,36 @@ class WebTorrent extends Component {
     }));
   };
 
+  handleRemove = async () => {
+    const { error, data } = await axios.post('http://localhost:5000/removetorrent', {
+      value: this.state.value,
+    });
+
+    this.setState(() => ({
+      disabled: !data.remove,
+      showVideo: !data.remove,
+    }));
+
+    clearInterval(this.interval);
+  };
+
   handleSubmit = async () => {
     const { error, data } = await axios.post('http://localhost:5000/addtorrent', {
       value: this.state.value,
     });
 
-    if (!error) {
-      this.setState(() => ({
-        showVideo: data.status === 200,
-        msg: data.msg,
-        files: data.files,
-        disabled: true,
-      }));
+    console.log('submit');
 
-      this.interval = setInterval(this.getStatus, 1000);
-    }
+    this.setState(() => ({
+      showVideo: data.status === 200,
+      msg: data.msg,
+      files: data.files,
+      disabled: true,
+    }));
+
+    this.interval = setInterval(this.getStatus, 1000);
+
+    console.log('submit click');
   };
 
   componentWillUnmount() {
@@ -95,11 +116,11 @@ class WebTorrent extends Component {
             color="primary"
             onClick={this.handleSubmit}
           >
-            Отправить
+            Добавить
           </Button>
         </StyledButton>
         {/*{this.state.files.map((file, index) => {*/}
-          {/*return <Typography key={index}>{file.name}</Typography>;*/}
+        {/*return <Typography key={index}>{file.name}</Typography>;*/}
         {/*})}*/}
 
         {this.state.showVideo && (
@@ -110,7 +131,14 @@ class WebTorrent extends Component {
           </div>
         )}
 
-        {this.state.showVideo && <Video />}
+        {this.state.showVideo && (
+          <VideoContainer>
+            <Video />
+            <Button variant="contained" color="secondary" onClick={this.handleRemove}>
+              Удалить
+            </Button>
+          </VideoContainer>
+        )}
       </Container>
     );
   }

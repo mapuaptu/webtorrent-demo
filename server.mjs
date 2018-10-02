@@ -27,13 +27,9 @@ app.get('/', (req, res) => {
 
 /* WebTorrent logic */
 
-const client = new WebTorrent();
+let client;
 
 let errorMessage = '';
-
-client.on('error', error => {
-  errorMessage = error.message;
-});
 
 let stats = {
   progress: 0,
@@ -41,16 +37,22 @@ let stats = {
   ratio: 0,
 };
 
-client.on('download', function(bytes) {
-  stats = {
-    progress: Math.round(client.progress * 100 * 100) / 100,
-    downloadSpeed: client.downloadSpeed,
-    ratio: client.ratio,
-  };
-});
-
 app.post('/addtorrent', (req, res) => {
   const magnet = req.body.value;
+
+  client = new WebTorrent();
+
+  client.on('error', error => {
+    errorMessage = error.message;
+  });
+
+  client.on('download', function(bytes) {
+    stats = {
+      progress: Math.round(client.progress * 100 * 100) / 100,
+      downloadSpeed: client.downloadSpeed,
+      ratio: client.ratio,
+    };
+  });
 
   // if (!magnet.match(/magnet:\?xt=urn:[a-z0-9]{20,50}/)) {
   //   console.log('not a magnet');
@@ -59,6 +61,8 @@ app.post('/addtorrent', (req, res) => {
   //     msg: 'Неверный формат magnet ссылки',
   //   });
   // }
+
+  console.log(magnet);
 
   client.add(magnet, torrent => {
     let files = [];
@@ -85,6 +89,26 @@ app.get('/status', (req, res) => {
     status: 200,
     msg: 'OK',
     stats,
+  });
+});
+
+app.post('/removetorrent', (req, res) => {
+  const magnet = req.body.value;
+
+  console.log(magnet);
+
+  client.destroy(() => {
+    stats = {
+      progress: 0,
+      downloadSpeed: 0,
+      ratio: 0,
+    };
+
+    res.json({
+      status: 200,
+      msg: 'OK',
+      remove: true,
+    });
   });
 });
 

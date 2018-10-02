@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 const StyledVideo = styled.div`
   margin-top: 50px;
+  margin-bottom: 50px;
   width: 500px;
   height: 100%;
   background-color: #000;
