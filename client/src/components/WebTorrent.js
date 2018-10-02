@@ -44,7 +44,7 @@ class WebTorrent extends Component {
   };
 
   getStatus = async () => {
-    const { error, data } = await axios.get('http://localhost:5000/status');
+    const { error, data } = await axios.get('/status');
 
     this.setState(() => ({
       stats: data.stats,
@@ -52,7 +52,7 @@ class WebTorrent extends Component {
   };
 
   handleRemove = async () => {
-    const { error, data } = await axios.post('http://localhost:5000/removetorrent', {
+    const { error, data } = await axios.post('/removetorrent', {
       value: this.state.value,
     });
 
@@ -65,7 +65,7 @@ class WebTorrent extends Component {
   };
 
   handleSubmit = async () => {
-    const { error, data } = await axios.post('http://localhost:5000/addtorrent', {
+    const { error, data } = await axios.post('/addtorrent', {
       value: this.state.value,
     });
 
