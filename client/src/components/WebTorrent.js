@@ -34,7 +34,7 @@ const VideoContainer = styled.div`
   align-items: center;
 `;
 
-const host = `http://localhost:5000`;
+const host = ``;
 
 class WebTorrent extends Component {
   state = {
