@@ -12,7 +12,7 @@ const StyledVideo = styled.div`
 const Video = props => {
   return (
     <StyledVideo>
-      <video controls={true} src="/stream" width={500} height={310} />
+      <video controls={true} src={props.src} width={500} height={310} />
     </StyledVideo>
   );
 };

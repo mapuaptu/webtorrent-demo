@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
-import { TextField, Button, Typography } from '@material-ui/core';
+import React, { Component, Fragment } from 'react';
+import { TextField, Button, Typography, CircularProgress } from '@material-ui/core';
 import Container from './Container';
 import styled from 'styled-components';
 import axios from 'axios';
 import Video from './Video';
+import Status from './Status';
 
 const StyledInput = styled.div`
   margin-bottom: 40px;
@@ -23,81 +24,89 @@ const StyledButton = styled.div`
   margin-bottom: 20px;
 `;
 
+const StyledProgress = styled.div`
+  margin-top: 220px;
+`;
+
 const VideoContainer = styled.div`
   display: flex;
   flex-flow: column;
   align-items: center;
 `;
 
+const host = `http://localhost:5000`;
+
 class WebTorrent extends Component {
   state = {
     value: '',
+    disableAdd: true,
+    disableInput: false,
+    helperText: '',
+    loading: false,
     msg: '',
     showVideo: false,
     files: [],
-    disabled: false,
+    torrents: '',
     stats: {
       progress: 0,
       downloadSpeed: 0,
     },
   };
 
-  getStatus = async () => {
-    const { error, data } = await axios.get('/status');
-
-    this.setState(() => ({
-      stats: data.stats,
-    }));
-  };
-
-  handleRemove = async () => {
-    const { error, data } = await axios.post('/removetorrent', {
-      value: this.state.value,
-    });
-
-    this.setState(() => ({
-      disabled: !data.remove,
-      showVideo: !data.remove,
-    }));
-
-    clearInterval(this.interval);
-  };
-
-  handleSubmit = async () => {
-    this.setState(() => ({
-      disabled: true,
-    }));
-
-    const { error, data } = await axios.post('/addtorrent', {
-      value: this.state.value,
-    });
-
-    console.log('submit');
-
-    this.setState(() => ({
-      showVideo: data.status === 200,
-      msg: data.msg,
-      files: data.files,
-      disabled: true,
-    }));
-
-    this.interval = setInterval(this.getStatus, 1000);
-
-    console.log('submit click');
-  };
-
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
-
   handleChange = event => {
     event.persist();
 
     const value = event.target.value;
 
+    if (!value) {
+      return this.setState(() => ({
+        helperText: 'Ссылка не может быть пустой',
+      }));
+    }
+
     this.setState(() => ({
       value,
+      disableAdd: false,
+      helperText: '',
     }));
+  };
+
+  handleSubmit = async () => {
+    try {
+      this.setState(() => ({
+        disableAdd: true,
+        disableInput: true,
+        loading: true,
+      }));
+
+      const { data } = await axios.post(`${host}/addtorrent`, {
+        value: this.state.value,
+      });
+
+      this.setState(() => ({
+        showVideo: true,
+        loading: false,
+        msg: data.msg,
+        files: data.files,
+        torrents: data.torrents,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  handleRemove = async () => {
+    try {
+      await axios.get(`${host}/removetorrent`);
+
+      this.setState(() => ({
+        disableAdd: false,
+        disableInput: false,
+        showVideo: false,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   render() {
@@ -105,16 +114,18 @@ class WebTorrent extends Component {
       <Container>
         <StyledInput>
           <TextField
+            disabled={this.state.disableInput}
             id="webtorrent"
             label="Введите ссылку"
             name="webtorrent"
             required={true}
             onChange={this.handleChange}
+            helperText={this.state.helperText}
           />
         </StyledInput>
         <StyledButton>
           <Button
-            disabled={this.state.disabled}
+            disabled={this.state.disableAdd}
             variant="contained"
             color="primary"
             onClick={this.handleSubmit}
@@ -122,26 +133,23 @@ class WebTorrent extends Component {
             Добавить
           </Button>
         </StyledButton>
-        {/*{this.state.files.map((file, index) => {*/}
-        {/*return <Typography key={index}>{file.name}</Typography>;*/}
-        {/*})}*/}
 
-        {this.state.showVideo && (
-          <div>
-            <Typography>Progress: {this.state.stats.progress} %</Typography>
-            <Typography>
-              Speed: {Math.round(this.state.stats.downloadSpeed) / 10 ** 6} Mb/s
-            </Typography>
-          </div>
+        {this.state.loading && (
+          <StyledProgress>
+            <CircularProgress />
+          </StyledProgress>
         )}
 
         {this.state.showVideo && (
-          <VideoContainer>
-            <Video />
-            <Button variant="contained" color="secondary" onClick={this.handleRemove}>
-              Удалить
-            </Button>
-          </VideoContainer>
+          <Fragment>
+            <Status host={host} />
+            <VideoContainer>
+              <Video src={`${host}/stream?${Date.now()}`} />
+              <Button variant="contained" color="secondary" onClick={this.handleRemove}>
+                Удалить
+              </Button>
+            </VideoContainer>
+          </Fragment>
         )}
       </Container>
     );

@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.static(`./client/build`));
-app.use(morgan('combined'));
+app.use(morgan('dev'));
 app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json());
@@ -30,12 +30,9 @@ let stats = {
 };
 
 app.post('/addtorrent', (req, res) => {
-  if (client) {
-    client.destroy();
-    console.log('client exist');
-  }
-
   const magnet = req.body.value;
+
+  console.log(magnet);
 
   client = new WebTorrent();
 
@@ -43,15 +40,22 @@ app.post('/addtorrent', (req, res) => {
     errorMessage = error.message;
   });
 
-  client.on('download', function(bytes) {
+  client.on('download', () => {
     stats = {
-      progress: Math.round(client.progress * 100 * 100) / 100,
+      progress: ((client.progress * 100 * 100) / 100).toFixed(0),
       downloadSpeed: client.downloadSpeed,
     };
   });
 
   client.add(magnet, torrent => {
     let files = [];
+
+    if (torrent.progress === 1) {
+      stats = {
+        progress: 100,
+        downloadSpeed: 0,
+      };
+    }
 
     torrent.files.forEach(data => {
       files.push({
@@ -60,12 +64,38 @@ app.post('/addtorrent', (req, res) => {
       });
     });
 
+    console.log('ADD SUCCESS');
+
     res.json({
       status: 200,
       msg: 'OK',
       files: files,
+      torrents: client.torrents.length,
     });
   });
+});
+
+app.get('/removetorrent', (req, res) => {
+  if (client) {
+    client.destroy(() => {
+      stats = {
+        progress: 0,
+        downloadSpeed: 0,
+      };
+
+      res.json({
+        status: 200,
+        msg: 'removed - OK',
+        remove: true,
+      });
+    });
+  } else {
+    res.json({
+      status: 200,
+      msg: 'client not exist',
+      remove: false,
+    });
+  }
 });
 
 app.get('/status', (req, res) => {
@@ -76,25 +106,10 @@ app.get('/status', (req, res) => {
   });
 });
 
-app.post('/removetorrent', (req, res) => {
-  const magnet = req.body.value;
-
-  client.destroy(() => {
-    stats = {
-      progress: 0,
-      downloadSpeed: 0,
-    };
-
-    res.json({
-      status: 200,
-      msg: 'OK',
-      remove: true,
-    });
-  });
-});
-
 app.get('/stream', (req, res) => {
   let range = req.headers.range;
+
+  console.log(range);
 
   let file = client.torrents[0].files[0];
 
@@ -118,6 +133,8 @@ app.get('/stream', (req, res) => {
   };
 
   let stream = file.createReadStream(stream_position);
+
+  console.log(stream_position);
 
   stream.pipe(res);
 });
